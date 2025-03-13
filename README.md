@@ -29,9 +29,9 @@ pip install -r requirements.txt
 SFT中几种不同的数据组织方式：
 
 1. 传统数据组织方式，红色部分是计算损失部分，存在大量padding。
-<img src="docs/image-1.png" width>
+<img src="docs/image-1.png" width=400>
 2. 变长、多轮loss数据组织方式，红色部分是计算损失部分，存在padding。
-<img src="docs/image-2.png">
+<img src="docs/image-2.png" width=400>
 3. 将batch内的序列打包成一个样本，序列并行计算。无padding，不同样本直接长度差异大。
 <img src="docs/image-3.png">
 
