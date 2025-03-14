@@ -15,13 +15,11 @@ class SFTData(object):
         attention_mask = records[0]["attention_mask"].unsqueeze(0)
         category_ids = records[0]["category_ids"].unsqueeze(0)
         packed_seq_lens = records[0]['packed_seq_lens'].to(torch.int32)
-        packed_turn_lens = records[0]['packed_turn_lens'].to(torch.int32)
         return dict(
             input_ids=input_ids,
             labels=labels,
             attention_mask=attention_mask,
             packed_seq_lens=packed_seq_lens,
-            packed_turn_lens=packed_turn_lens,
             category_ids=category_ids
         )
 
