@@ -1,4 +1,3 @@
-import os
 from tqdm import tqdm
 import argparse
 import random
@@ -9,11 +8,10 @@ from multiprocessing import Pool
 from datasets import load_from_disk, Dataset
 
 
-def process_single_group(packed_sequences, sequences):
+def process_single_group(group_indices, sequences, max_length, padding_value):
     """处理单个packed sequence组"""
-    group_indices = packed_sequences['current_seq']
-    max_length = packed_sequences['current_len']
-    packed_input_ids = np.full(max_length, 0, dtype=np.int64)
+    # 预分配numpy数组，使用padding_value初始化
+    packed_input_ids = np.full(max_length, padding_value, dtype=np.int64)
     packed_labels = np.full(max_length, -100, dtype=np.int64)
     packed_category_ids = np.zeros(max_length, dtype=np.int64)
     attention_mask = np.zeros(max_length, dtype=np.int64)
@@ -46,13 +44,14 @@ def process_single_group(packed_sequences, sequences):
     }
 
 
-def pack_sequences(sequences, max_length, num_workers=20, max_attempt=2000):
+def pack_sequences(sequences, max_length, num_workers=20, padding_value=0, max_attempt=2000):
     """
     使用贪心算法将多个序列打包成固定长度的序列，尽量减少packed_sequences的数量
 
     Args:
         sequences: 包含多个序列的列表，每个序列是一个字典，包含'input_ids'键
         max_length: 打包后序列的最大长度
+        padding_value: 填充值
 
     Returns:
         packed_results: 包含打包后的序列和长度信息的字典列表
@@ -93,13 +92,15 @@ def pack_sequences(sequences, max_length, num_workers=20, max_attempt=2000):
                         continue
                     else:
                         break
-        packed_sequences.append({"current_seq": current_seq, "current_len": current_len})
+        packed_sequences.append(current_seq)
     pbar.close()
 
     with Pool(num_workers) as pool:
         process_fn = partial(
             process_single_group,
-            sequences=sequences
+            sequences=sequences,
+            max_length=max_length,
+            padding_value=padding_value
         )
 
         # 使用imap显示进度条
@@ -112,10 +113,11 @@ def pack_sequences(sequences, max_length, num_workers=20, max_attempt=2000):
     return packed_results
 
 class Packer(object):
-    def __init__(self, input_path, output_path, max_length, num_workers, max_attempt):
+    def __init__(self, input_path, output_path, max_length, padding_value, num_workers, max_attempt):
         self.dataset = load_from_disk(input_path)
         self.output_path = output_path
         self.max_length = max_length
+        self.padding_value = padding_value
         self.num_workers = num_workers
         self.max_attempt = max_attempt
         self.packed_dataset = None
@@ -131,6 +133,7 @@ class Packer(object):
         packed_data = pack_sequences(
             valid_items,
             max_length=self.max_length,
+            padding_value=self.padding_value,
             max_attempt=self.max_attempt
         )
         self.packed_dataset = Dataset.from_list(packed_data)
@@ -148,6 +151,7 @@ def parse_args():
     parser.add_argument('--input-path', type=str, help='数据路径')
     parser.add_argument('--output-path', type=str, help='数据保存路径')
     parser.add_argument('--max-length', type=int, help=' 最大长度')
+    parser.add_argument('--padding-value', type=int, help='padding值')
     parser.add_argument('--num-workers', type=int, help='并行处理的工作进程数')
     return parser.parse_args()
 
@@ -157,6 +161,7 @@ def main():
         input_path=args.input_path,
         output_path=args.output_path,
         max_length=args.max_length,
+        padding_value=args.padding_value,
         num_workers=args.num_workers,
         max_attempt=2000) # 打包超出最大长度时，继续向后查找次数
     packer.pack()
