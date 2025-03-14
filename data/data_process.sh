@@ -25,7 +25,7 @@ if [ $step1 -ne 0 ]; then
         --seed=2025 --num-workers=10
 fi
 
-tokenizer_path=/Users/wayne/PycharmProjects/OpenSFT-new/temp-tokenizer
+tokenizer_path=
 
 if [ $step2 -ne 0 ]; then
     python script/step2.tokenize.py \
@@ -41,6 +41,5 @@ if [ $step3 -ne 0 ]; then
         --input-path=$tokenized_data_path \
         --output-path=$packed_data_path \
         --max-length=131072 \
-        --padding-value=151643 \
         --num-workers=10
 fi
