@@ -127,12 +127,17 @@ def main(args):
                 accelerator.backward(loss)
 
                 if accelerator.sync_gradients:
-
+                    gathered_loss = accelerator.gather(loss.clone().detach())
+                    mask = (gathered_loss != 0)
+                    if mask.sum() == 0:
+                        loss_ = torch.tensor(0.0, device=accelerator.device)
+                    else:
+                        loss_ = gathered_loss[mask].mean()
                     loss_log = {
                         "epoch": epoch,
                         "steps": step,
                         "lr": scheduler.get_last_lr()[0],
-                        "loss": loss.item()
+                        "loss": loss_.item()
                     }
 
                     progress_bar.set_postfix(loss_log)
