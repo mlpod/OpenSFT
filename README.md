@@ -9,7 +9,7 @@
 
 <hr>
 
-OpenSFT，顾名思义，一个开源的SFT训练框架，基于 accelerator + deepspeed + ring flash attention 实现。
+OpenSFT，一个开源的SFT训练框架，基于 accelerator + deepspeed + ring flash attention 实现。
 
 本项目实现了length-pack数据组织逻辑，进一步增加了并行量；实现了序列并行下的分类loss统计，更好地监控各类别效果；新增了序列并行下的turn-loss，兼顾长短对话。
 
@@ -29,13 +29,17 @@ pip install -r requirements.txt
 SFT中几种不同的数据组织方式：
 
 1. 传统数据组织方式，红色部分是计算损失部分，存在大量padding。
+
 <img src="docs/image-1.png" width=400>
+
 2. 变长、多轮loss数据组织方式，红色部分是计算损失部分，存在padding。
+
 <img src="docs/image-2.png" width=400>
-3. 将batch内的序列打包成一个样本，序列并行计算。无padding，不同样本直接长度差异大。
+
+3. 将batch内的序列打包成一个样本，序列并行计算。有padding（需要补齐到能被序列并行度整除），不同样本直接长度差异大。
 <img src="docs/image-3.png">
 
-**本项目实现的数据组织方式**： 在3基础上，将batch内改为按指定最大长度组织数据，打包直到快超出最大长度。无padding，不同样本直接长度差异微乎其微。例如指定128K，在distill_r1_110k数据集上可以压缩至1k样本量。
+**本项目实现的数据组织方式**： 在3基础上，将batch内改为按指定最大长度组织数据，打包直到快超出最大长度，因此有更少的padding。不同样本直接长度差异微乎其微。例如指定128K，在distill_r1_110k数据集上可以压缩至1k样本量。
 
 在线打包会带来一定耗时，在此采用了离线计算的方式，将训练和数据处理进行解耦。
 另外离线计算中应用了贪心、并发等实现，进一步减少了pack后样本长度差异和时长，详见代码。
