@@ -77,7 +77,7 @@ def convert_to_local_input(input_ids, labels, attention_mask, packed_seq_lens, c
     ring_attn_rank = dist.get_rank(group=RING_ATTN_GROUP)
     ring_attn_size = dist.get_world_size(group=RING_ATTN_GROUP)
     total_seq_len = input_ids.numel()
-    local_seq_len = total_seq_len // ring_attn_size
+    local_seq_len = total_seq_len // ring_attn_size + 1
     start, end = ring_attn_rank * local_seq_len, (ring_attn_rank + 1) * local_seq_len
     local_input_ids = input_ids[:, start:end]
     local_labels_ids = labels[:, start:end]

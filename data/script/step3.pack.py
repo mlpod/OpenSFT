@@ -155,7 +155,7 @@ def main():
     args = parse_args()
     packer = Packer(
         input_path=args.input_path,
-        output_path=args.input_path,
+        output_path=args.output_path,
         max_length=args.max_length,
         num_workers=args.num_workers,
         max_attempt=2000) # 打包超出最大长度时，继续向后查找次数
