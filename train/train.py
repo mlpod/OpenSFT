@@ -201,5 +201,5 @@ if __name__ == "__main__":
     args.add_argument("--data_config_path", type=str, default="")
     args.add_argument("--sequence_parallel_degree", type=int, default=8)
     args.add_argument("--num_epochs", type=int, default=4)
-    args.add_argument("--use_turn_loss", type=bool, action='store_true', default=False)
+    args.add_argument("--use_turn_loss", action='store_true')
     main(args.parse_args())
