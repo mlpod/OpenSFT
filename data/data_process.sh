@@ -25,6 +25,8 @@ if [ $step1 -ne 0 ]; then
         --seed=2025 --num-workers=10
 fi
 
+# python script/pseudo.multiturn.py
+
 tokenizer_path=
 padding_value=
 

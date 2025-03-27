@@ -15,6 +15,11 @@ OpenSFT，一个开源的SFT训练框架，基于 accelerator + deepspeed + ring
 
 本训练框架非常轻量，易于学习和二次开发，欢迎star。
 
+### 更新
+
+2025.03.27 新增按概率拼接伪多轮，详见data/script/pseudo.multiturn.py
+
+
 
 ### 环境安装
 
